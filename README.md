@@ -1,3 +1,5 @@
+modification by @tbrunetti from Illumina/BeadArrayFiles
+
 # IlluminaBeadArrayFiles
 Library to parse file formats related to Illumina bead arrays. GTC files are produced by the AutoConvert and AutoCall softwares and contain genotyping (and other) information encoded in a binary format. The IlluminaBeadArrayFiles library provides a parser to extract information from these binary files.
 

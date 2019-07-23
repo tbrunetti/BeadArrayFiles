@@ -1,0 +1,12 @@
+>test_gtcs_for_haplotypes/201137790136_R01C01.gtc	star3_star3_cyp2c19
+rs4244285.1	GG
+exm843929	AA
+rs12248560.1	CC
+>test_gtcs_for_haplotypes/201137790136_R01C01.gtc	star1_star1_cyp2c19
+rs4244285.1     GG
+exm843929       GG
+rs12248560.1    CC
+>test_gtcs_for_haplotypes/201137790136_R01C01.gtc       star2_star17_cyp2c19
+rs4244285.1     AG
+exm843929       GG
+rs12248560.1    CT

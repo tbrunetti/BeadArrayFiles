@@ -8,7 +8,6 @@ import pandas
 import write_gtc
 
 
-
 def manipulate_gtc(bpm, snpsToUpdate, outDir):    
     
     def getGtcInfo(gtc): 
@@ -84,10 +83,11 @@ def manipulate_gtc(bpm, snpsToUpdate, outDir):
             assert len(manifest.names) == len(gtc_copy.get_logr_ratios())
             assert len(manifest.names) == len(gtc_copy.get_ballele_freqs())
             print(os.path.join(outDir, '{}.gtc'.format(outputName)) + ' passed validation!')
+            sys.stdout.flush()
 
         except AssertionError:
             print(os.path.join(outDir, '{}.gtc'.format(outputName)) + ' failed validation -- please re-run this gtc')
-
+            sys.stdout.flush()
 
     
     manifest = BeadPoolManifest(bpm)
@@ -107,6 +107,7 @@ def manipulate_gtc(bpm, snpsToUpdate, outDir):
                     data = getGtcInfo(gtc=gtc)
                 else:
                     print('Writing updated GTC to new GTC file...')
+                    sys.stdout.flush()
                     with open(os.path.join(outDir, '{}.gtc'.format(outputName)), "wb") as output_handle:
                         write_gtc.write_gtc(data, output_handle)
                     
@@ -120,6 +121,7 @@ def manipulate_gtc(bpm, snpsToUpdate, outDir):
 
     # always the last gtc because out of lines in file at this point    
     print('Writing final updated GTC to new GTC file...')
+    sys.stdout.flush()
     with open(os.path.join(outDir, '{}.gtc'.format(outputName)), "wb") as output_handle:
         write_gtc.write_gtc(data, output_handle)
     

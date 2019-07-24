@@ -45,6 +45,29 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
 
         return data
 
+    def updateMetaData(data, metaData):
+        import iteritems
+
+        dataDict = {}
+        metaDataUpdates = metadata.rstrip().split(',')
+        for update in metaDataUpdates:
+            if update.rstrip().split('=')[0] == 'sampleName':
+                dataDict[10] = update.rstrip().split('=')[1]
+            elif update.rstrip().split('=')[0] == 'sentrixBarcode':
+                dataDict[1016] = update.rstrip().split('=')[1]
+            elif update.rstrip().split('=')[0] == 'plateName':
+                dataDict[11] = update.rstrip().split('=')[1]
+            elif update.rstrip().split('=')[0] == 'well':
+                dataDict[12] = update.rstrip().split('=')[1]
+            else:
+                print('MetaData {} does not exist; please make sure spelling is correct and case sensitive!  Ignoring...'.format(update.rstrip().split('=')[0]))
+                sys.stdout.flush()
+
+        for key,value in dataDict.items():
+            data[key] = value
+
+        return data
+
     def snpUpdate(data, line):
         loc = manifest.names.index(line.rstrip().split()[0])
         data[1003][loc] = str(line.rstrip().split()[1])
@@ -105,6 +128,10 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
                     gtc = line.rstrip().split()[0][1:]
                     outputName = line.rstrip().split()[1]
                     data = getGtcInfo(gtc=os.path.join(gtcDir, gtc))
+                    if len(line.rstrip().split()) == 3: # means there is metadata to update
+                        print("Metadata found. Updating metadata...")
+                        sys.stdout.flush()
+                        data = updateMetaData(data=data, metaData=line.rstrip().split()[2])
                 else:
                     print('Writing updated GTC to new GTC file...')
                     sys.stdout.flush()
@@ -116,6 +143,11 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
                     gtc = line.rstrip().split()[0][1:]
                     outputName = line.rstrip().split()[1]
                     data = getGtcInfo(gtc=os.path.join(gtcDir, gtc))
+                    if len(line.rstrip().split()) == 3: # means there is metadata to update
+                        print("Metadata found. Updating metadata...")
+                        sys.stdout.flush()
+                        data = updateMetaData(data=data, metaData=line.rstrip().split()[2])
+                        
             else:
                 data = snpUpdate(data=data, line=line)
 

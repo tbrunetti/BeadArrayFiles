@@ -46,10 +46,10 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
         return data
 
     def updateMetaData(data, metaData):
-        import iteritems
+        import itertools
 
         dataDict = {}
-        metaDataUpdates = metadata.rstrip().split(',')
+        metaDataUpdates = metaData.rstrip().split(',')
         for update in metaDataUpdates:
             if update.rstrip().split('=')[0] == 'sampleName':
                 dataDict[10] = update.rstrip().split('=')[1]
@@ -147,7 +147,7 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
                         print("Metadata found. Updating metadata...")
                         sys.stdout.flush()
                         data = updateMetaData(data=data, metaData=line.rstrip().split()[2])
-                        
+
             else:
                 data = snpUpdate(data=data, line=line)
 

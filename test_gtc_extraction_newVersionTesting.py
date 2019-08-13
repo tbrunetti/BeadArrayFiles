@@ -70,13 +70,19 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
 
     def snpUpdate(data, line):
         loc = manifest.names.index(line.rstrip().split()[0])
+        originalSnp = data[1003][loc]
         data[1003][loc] = str(line.rstrip().split()[1])
         if ((str(line.rstrip().split()[1])[0] != str(line.rstrip().split()[1])[1]) and (str(line.rstrip().split()[1])[0] != '-')):
             data[1002][loc] = 2
         elif (str(line.rstrip().split()[1])[0] == '-') and (str(line.rstrip().split()[1])[1] == '-'):
             data[1002][loc] = 0
         elif (str(line.rstrip().split()[1])[0] == str(line.rstrip().split()[1])[1]) and (str(line.rstrip().split()[1])[0] in ['A', 'T', 'G', 'C']) and (str(line.rstrip().split()[1])[1] in ['A', 'T', 'G', 'C']):
-            data[1002][loc] = manifest.snps[loc].find(str(line.rstrip().split()[1])[0])
+            if manifest.snps[loc].find(str(line.rstrip().split()[1])[0]) != -1:
+                data[1002][loc] = manifest.snps[loc].find(str(line.rstrip().split()[1])[0])
+            else:
+                print('WARNING! {} allele possibilities do not match manifest.  {}={} and manifest={}. This snp will not be updated.'.format(line.rstrip().split()[0],line.rstrip().split()[0],originalSnp,manifest.snps[loc]))
+                sys.stdout.flush()
+                data[1003][loc] = originalSnp
         else:
             pass
 

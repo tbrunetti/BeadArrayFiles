@@ -168,11 +168,40 @@ def manipulate_gtc(bpm, gtcDir, snpsToUpdate, outDir):
     print("All processing is finished!")
     sys.exit()
 
+
+
+
+
+def getSampleInfo(bpm, gtcDir, outDir):
+
+    def getGTCinfo(gtc):
+        gtcData = GenotypeCalls(gtc)
+
+        data={}
+        data[GenotypeCalls._GenotypeCalls__ID_SAMPLE_NAME] = gtcData.get_sample_name()  # key:10
+        data[GenotypeCalls._GenotypeCalls__ID_SAMPLE_PLATE] = gtcData.get_sample_plate()
+        data[GenotypeCalls._GenotypeCalls__ID_SAMPLE_WELL] = gtcData.get_sample_well()  # key:12
+
+        return data
+
+
+    nameMatch = open(os.path.join(outDir, 'sentrixMap.txt'), 'w')
+    manifest = BeadPoolManifest(bpm)
+    input_gtc_list = [gtc for gtc in os.listdir(gtcDir) if gtc.endswith(".gtc")]
+
+    for sampleGtc in input_gtc_list:
+        names = getGTCinfo(gtc=os.path.join(gtcDir, sampleGtc))
+        nameMatch.write(names[10] + '\t' + names[11] + '\t' + names[12] + '\t' + sampleGtc + '\t' + '{}-{}-{}'.format(names[11], names[12], names[10]) + '\n')
+    
+    nameMatch.flush()
+    nameMatch.close()
+
+
 def main(bpm, gtcDir, outDir):
 
     manifest = BeadPoolManifest(bpm)
     input_gtc_list = [gtc for gtc in os.listdir(gtcDir) if gtc.endswith(".gtc")]
-   
+    
     for samples in input_gtc_list:
         genotype_calls = GenotypeCalls(os.path.join(gtcDir, samples))
 
@@ -240,5 +269,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+
+    '''
+    Uncomment commands below to activate
+    '''
+
     #main(bpm=args.bpm, gtcDir=args.gtcDir, outDir=args.outDir)
-    manipulate_gtc(bpm=args.bpm, gtcDir=args.gtcDir, snpsToUpdate=args.snpUpdates, outDir=args.outDir)
+    #manipulate_gtc(bpm=args.bpm, gtcDir=args.gtcDir, snpsToUpdate=args.snpUpdates, outDir=args.outDir)
+    getSampleInfo(bpm=args.bpm, gtcDir=args.gtcDir, outDir=args.outDir)

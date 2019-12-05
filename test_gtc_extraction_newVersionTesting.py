@@ -300,8 +300,29 @@ def getSampleInfo(bpm, gtcDir, outDir):
              _GenotypeCalls__ID_SAMPLE_PLATE] = gtcData.get_sample_plate()
         data[GenotypeCalls.
              _GenotypeCalls__ID_SAMPLE_WELL] = gtcData.get_sample_well(
-             )  # key:12
-
+             )
+            # key:12
+        data[
+            GenotypeCalls.
+            _GenotypeCalls__ID_B_ALLELE_FREQS] = genotype_calls.get_ballele_freqs(
+            )# key:1012
+        data[
+            GenotypeCalls.
+            _GenotypeCalls__ID_CALL_RATE] = genotype_calls.get_call_rate(
+            )  # key:1006
+        data[GenotypeCalls._GenotypeCalls__ID_GC10] = genotype_calls.get_gc10(
+        )  # key:1009
+        data[GenotypeCalls.
+             _GenotypeCalls__ID_GENDER] = genotype_calls.get_gender(
+             )  # key:1007
+        data[
+            GenotypeCalls.
+            _GenotypeCalls__ID_LOGR_DEV] = genotype_calls.get_logr_dev(
+            )  # key:1008 
+        data[
+            GenotypeCalls.
+            _GenotypeCalls__ID_SNP_MANIFEST] = genotype_calls.get_snp_manifest(
+            )  # key:101 
         return data
 
     nameMatch = open(os.path.join(outDir, 'sentrixMap.txt'), 'w')
@@ -310,12 +331,22 @@ def getSampleInfo(bpm, gtcDir, outDir):
         gtc for gtc in os.listdir(gtcDir) if gtc.endswith(".gtc")
     ]
 
-    for sampleGtc in input_gtc_list:
-        names = getGTCinfo(gtc=os.path.join(gtcDir, sampleGtc))
-        nameMatch.write(names[10] + '\t' + names[11] + '\t' + names[12] +
-                        '\t' + sampleGtc + '\t' +
-                        '{}-{}-{}'.format(names[11], names[12], names[10]) +
-                        '\n')
+    header = ['BTID', 'well', 'plate', 'gtcName', 'sampleID', 'callRate', 'gc10', 'sex', 'baf', 'logrDev']
+    nameMatch.write('\t'.join(header) + '\n')
+    try:
+        for sampleGtc in input_gtc_list:
+            assert manifest == names[101]
+            names = getGTCinfo(gtc=os.path.join(gtcDir, sampleGtc))
+            nameMatch.write(names[10] + '\t' + names[11] + '\t' + names[12] +
+                            '\t' + sampleGtc + '\t' +
+                            '{}-{}-{}'.format(names[11], names[12], names[10]) + 
+                            '\t' + names[1006] + '\t' + names[1009] + '\t' +
+                            names[1007] + '\t' + names[1012] + '\t' + names[1008] +
+                            '\n')
+
+    except AssertionError:
+        print("Error, sample {} in gtc {} does not have matching manifest/bpm file. Sample manifest is listed as {}.  Skipping sample.".format(
+            names[10], sampleGtc, names[101]))
 
     nameMatch.flush()
     nameMatch.close()
@@ -355,6 +386,11 @@ def getControlsIntensity(gtcDir, bpm, outDir):
         gtc for gtc in os.listdir(gtcDir) if gtc.endswith(".gtc")
     ]
 
+    #TODO: detect which probes are available based on CSV input
+    #TODO: use the names in CSV and then get a BCP mapping
+
+
+
     intensity_probes_X = [
         "STAINING_DNP_HIGH_1X", "STAINING_DNP_BGND_1X",
         "STAINING_BIOTIN_HIGH_1X", "STAINING_BIOTIN_BGND_1X", "EXTENSION_A_1X",
@@ -365,7 +401,7 @@ def getControlsIntensity(gtcDir, bpm, outDir):
         "NSB_BGND_RED_1X", "NSB_BGNF_PURPLE_1X", "NSB_BGND_BLUE_1X",
         "NSB_BGND_GREEN_1X", "NON_POLYMORPHIC_NP_A_1X",
         "NON_POLYMORPHIC_NP_T_1X", "NON_POLYMORPHIC_NP_C_1X",
-        "NON_POLYMORPHIC_NP_G_1X", "473-MISSING"
+        "NON_POLYMORPHIC_NP_G_1X", "RESTORE_X"
     ]
 
     intensity_probes_Y = [
@@ -378,7 +414,7 @@ def getControlsIntensity(gtcDir, bpm, outDir):
         "NSB_BGND_RED_1Y", "NSB_BGNF_PURPLE_1Y", "NSB_BGND_BLUE_1Y",
         "NSB_BGND_GREEN_1Y", "NON_POLYMORPHIC_NP_A_1Y",
         "NON_POLYMORPHIC_NP_T_1Y", "NON_POLYMORPHIC_NP_C_1Y",
-        "NON_POLYMORPHIC_NP_G_1Y", "332-MISSING"
+        "NON_POLYMORPHIC_NP_G_1Y", "RESTORE_Y"
     ]
 
     intensities_per_sample = {}

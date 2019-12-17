@@ -304,24 +304,20 @@ def getSampleInfo(bpm, gtcDir, outDir):
             # key:12
         data[
             GenotypeCalls.
-            _GenotypeCalls__ID_B_ALLELE_FREQS] = genotype_calls.get_ballele_freqs(
-            )# key:1012
-        data[
-            GenotypeCalls.
-            _GenotypeCalls__ID_CALL_RATE] = genotype_calls.get_call_rate(
+            _GenotypeCalls__ID_CALL_RATE] = gtcData.get_call_rate(
             )  # key:1006
-        data[GenotypeCalls._GenotypeCalls__ID_GC10] = genotype_calls.get_gc10(
+        data[GenotypeCalls._GenotypeCalls__ID_GC10] = gtcData.get_gc10(
         )  # key:1009
         data[GenotypeCalls.
-             _GenotypeCalls__ID_GENDER] = genotype_calls.get_gender(
+             _GenotypeCalls__ID_GENDER] = gtcData.get_gender(
              )  # key:1007
         data[
             GenotypeCalls.
-            _GenotypeCalls__ID_LOGR_DEV] = genotype_calls.get_logr_dev(
+            _GenotypeCalls__ID_LOGR_DEV] = gtcData.get_logr_dev(
             )  # key:1008 
         data[
             GenotypeCalls.
-            _GenotypeCalls__ID_SNP_MANIFEST] = genotype_calls.get_snp_manifest(
+            _GenotypeCalls__ID_SNP_MANIFEST] = gtcData.get_snp_manifest(
             )  # key:101 
         return data
 
@@ -331,22 +327,23 @@ def getSampleInfo(bpm, gtcDir, outDir):
         gtc for gtc in os.listdir(gtcDir) if gtc.endswith(".gtc")
     ]
 
-    header = ['BTID', 'well', 'plate', 'gtcName', 'sampleID', 'callRate', 'gc10', 'sex', 'baf', 'logrDev']
+    header = ['BTID', 'plate', 'well', 'gtcName', 'sampleID', 'callRate', 'gc10', 'sex', 'logrDev']
     nameMatch.write('\t'.join(header) + '\n')
-    try:
-        for sampleGtc in input_gtc_list:
-            assert manifest == names[101]
+    
+    for sampleGtc in input_gtc_list:
+        try:
             names = getGTCinfo(gtc=os.path.join(gtcDir, sampleGtc))
+            assert manifest.manifest_name == names[101]
             nameMatch.write(names[10] + '\t' + names[11] + '\t' + names[12] +
                             '\t' + sampleGtc + '\t' +
                             '{}-{}-{}'.format(names[11], names[12], names[10]) + 
-                            '\t' + names[1006] + '\t' + names[1009] + '\t' +
-                            names[1007] + '\t' + names[1012] + '\t' + names[1008] +
+                            '\t' + str(names[1006]) + '\t' + str(names[1009]) + '\t' +
+                            str(names[1007]) + '\t' + str(names[1008]) +
                             '\n')
 
-    except AssertionError:
-        print("Error, sample {} in gtc {} does not have matching manifest/bpm file. Sample manifest is listed as {}.  Skipping sample.".format(
-            names[10], sampleGtc, names[101]))
+        except AssertionError:
+            print("Error, sample {} in gtc {} does not have matching manifest/bpm file. Sample manifest is listed as {}.  Skipping sample.".format(
+             names[10], sampleGtc, names[101]))
 
     nameMatch.flush()
     nameMatch.close()
@@ -376,6 +373,14 @@ def getControlsIntensity(gtcDir, bpm, outDir):
             GenotypeCalls.
             _GenotypeCalls__ID_CONTROLS_Y] = genotype_calls.get_control_y_intensities(
             )  # key:501 - 92 values
+	data[GenotypeCalls.
+             _GenotypeCalls__ID_SAMPLE_WELL] = genotype_calls.get_sample_well(
+             )  # key:12
+	data[
+            GenotypeCalls.
+            _GenotypeCalls__ID_SAMPLE_PLATE] = genotype_calls.get_sample_plate(
+            )  # key:11
+
 
         return data
 
@@ -423,17 +428,17 @@ def getControlsIntensity(gtcDir, bpm, outDir):
         data = getGtcInfo(gtc=gtc)
         try:
             assert data[101] == manifest.manifest_name
-            intensities_per_sample[data[10]] = {}
+            intensities_per_sample['{}-{}-{}'.format(data[11], data[12], data[10])] = {}
             intensityIndex = 0
             for i in range(0, len(data[500])):
                 if i%4 == 0:
-                    intensities_per_sample[data[10]][intensity_probes_X[intensityIndex]] = data[500][i]
-                    intensities_per_sample[data[10]][intensity_probes_Y[intensityIndex]] = data[501][i]
+                    intensities_per_sample['{}-{}-{}'.format(data[11], data[12], data[10])][intensity_probes_X[intensityIndex]] = data[500][i]
+                    intensities_per_sample['{}-{}-{}'.format(data[11], data[12], data[10])][intensity_probes_Y[intensityIndex]] = data[501][i]
                     intensityIndex += 1
                 else:
                     continue
         except AssertionError:
-            print("Sample {} does not have a matching MEGA2 bpm. Skipping sample.".format(data[10]))
+            print("Sample {}, {} does not have a matching MEGA2 bpm. Skipping sample.".format(data[10], gtc))
             sys.stdout.flush()
             continue
             
